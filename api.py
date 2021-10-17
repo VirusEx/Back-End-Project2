@@ -99,7 +99,7 @@ def addFollower(
     return follower
 
 @hug.get("/followers/")
-def getFollowingId(db:sqlite, response, follower_id:hug.types.number, following_id:hug.types.number):
+def removeFollower(db:sqlite, response, follower_id:hug.types.number, following_id:hug.types.number):
 
     followers = db["followers"]
 
