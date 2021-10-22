@@ -4,11 +4,13 @@ CREATE TABLE IF NOT EXISTS users (
     id        INTEGER PRIMARY KEY,
     username  TEXT NOT NULL UNIQUE,
     email     TEXT NOT NULL UNIQUE,
-    password  TEXT NOT NULL
+    password  TEXT NOT NULL,
+    bio       TEXT
 );
-INSERT INTO users VALUES(1, 'ProfAvery', 'kavery@fullerton.edu', 'password');
-INSERT INTO users VALUES(2, 'KevinAWortman', 'kwortman@fullerton.edu', 'qwerty');
-INSERT INTO users VALUES(3, 'Beth_CSUF', 'beth.harnick.shapiro@fullerton.edu', 'secret');
+INSERT INTO users VALUES(1, 'ProfAvery', 'kavery@fullerton.edu', 'password', "ProfAvery's bio");
+INSERT INTO users VALUES(2, 'KevinAWortman', 'kwortman@fullerton.edu', 'qwerty', '');
+INSERT INTO users VALUES(3, 'Beth_CSUF', 'beth.harnick.shapiro@fullerton.edu', 'secret', '');
+INSERT INTO users VALUES(4, 'DannyNg', 'dannyng@csu.fullerton.edu', 'youCantSeeMe',"I like to move it move it");
 
 CREATE TABLE IF NOT EXISTS followers (
     id            INTEGER PRIMARY KEY,

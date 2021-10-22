@@ -6,6 +6,7 @@
 
 import configparser
 import logging.config
+from typing import Optional
 
 import hug
 import sqlite_utils
@@ -42,6 +43,7 @@ def create_users(
     username: hug.types.text,
     email: hug.types.text,
     password: hug.types.text,
+    bio: hug.types.text,
     db: sqlite,
 ):
     users = db["users"]
@@ -50,6 +52,7 @@ def create_users(
         "username": username,
         "email": email,
         "password": password,
+        "bio": bio,
     }
 
     try:
@@ -98,7 +101,7 @@ def addFollower(
     response.set_header("Location", f"/followers/{follower['id']}")
     return follower
 
-@hug.get("/followers/")
+@hug.delete("/followers/")
 def removeFollower(db:sqlite, response, follower_id:hug.types.number, following_id:hug.types.number):
 
     followers = db["followers"]
@@ -111,27 +114,38 @@ def removeFollower(db:sqlite, response, follower_id:hug.types.number, following_
     # return {"followers" : followers.rows_where("follower_id = ? AND following_id = ?", [follower_id, following_id])}
     return hug.falcon.HTTP_204
 
-@hug.get("/posts/")
+@hug.get("/following/")
+def getFollowings (db:sqlite,  response, user_id:hug.types.number):
+
+    followers = db["followers"]
+    
+    return followers.rows_where("follower_id = ?", [user_id], select='following_id')
+
+@hug.get("/posts/mypost/")
 def getUserTimeline(db:timelinesdb, username):
     
     timelines = db["posts"]
 
     return {"posts" : timelines.rows_where("username = ?", [username])}
 
-@hug.get("/posts/")
+@hug.get("/posts/allpost")
 def getPublicTimeline(db:timelinesdb):
     timelines = db["posts"]
     return {"posts" : timelines.rows_where()}
 
-@hug.get("/posts/")
-def getHomeTimeline(db:timelinesdb, json = target):
+# following is a list of following ID from client
+@hug.get("/posts/home")
+def getHomeTimeline(db:timelinesdb, followings):
     
     timelines = db["posts"]
-    following = []
-    for i in target:
-        following.append(i[following_id])
+    values = str
+    for i in range(len(followings)):
+        if i==0:
+            values = "user_id = ?"
+        else:
+            values += " OR user_id = ?"
 
-    return {"posts" : timelines.rows_where()}
+    return {"posts" : timelines.rows_where(values, followings)}
 
 
 #TODO FINISH THIS
@@ -139,6 +153,7 @@ def getHomeTimeline(db:timelinesdb, json = target):
 def postTweet(
     response,
     username: hug.types.text,
+    user_id: hug.types.number,
     text: hug.types.text,
     db: timelinesdb,
 ):
@@ -146,15 +161,16 @@ def postTweet(
     timelines = db["posts"]
     post = {
         "username":username,
+        "user_id":user_id,
         "text":text
     }
 
     try:
-        timelines.insert(text)
-        follower["id"] = followers.last_pk
+        timelines.insert(post)
+        post["id"] = timelines.last_pk
     except Exception as e:
-        response.status = hug.falcon.HTTP_204
+        response.status = hug.falcon.HTTP_409
         return {"error": str(e)}
 
-    response.set_header("Location", f"/followers/{follower['id']}")
-    return follower
+    #response.set_header("Location", f"/followers/{follower['id']}")
+    return post
