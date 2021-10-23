@@ -57,7 +57,7 @@ def create_users(
 
     try:
         users.insert(user)
-        user["username"] = users.last_pk
+        user["id"] = users.last_pk
     except Exception as e:
         response.status = hug.falcon.HTTP_409
         return {"error": str(e)}
