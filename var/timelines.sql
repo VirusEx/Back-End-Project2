@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS posts (
     username    TEXT NOT NULL,
     user_id     INTEGER NOT NULL,
     text        TEXT NOT NULL,
-    timestamp   INTEGER DEFAULT CURRENT_TIMESTAMP
+    timestamp   INTEGER DEFAULT CURRENT_TIMESTAMPzq
 );
 INSERT INTO posts(username, user_id, text) VALUES('ProfAvery', 1, 'Meanwhile, at the R1 institution down the street... https://uci.edu/coronavirus/messages/200710-sanitizer-recall.php');
 INSERT INTO posts(username, user_id, text) VALUES('ProfAvery', 1, 'FYI: https://www.levels.fyi/still-hiring/');
