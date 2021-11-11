@@ -6,3 +6,5 @@ like.incr('post1')
 like.incr('post2')
 like.incr('tryme')
 print(like.get('tryme'))
+
+print(like.get('post1'))
