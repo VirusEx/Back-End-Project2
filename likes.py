@@ -1,7 +1,10 @@
 import configparser
 import logging.config
+import requests
 
+import heapq
 import redis
+from requests.models import Response
 import hug
 import sqlite_utils
 import json
@@ -23,14 +26,16 @@ def timelinesdb(section="timelinesdb", key="dbfile", **kwargs):
 
 
 @hug.post("/likes/")
-def likePosts(db:timelinesdb, postID:hug.types.text, username:hug.types.text):
+def likePosts(postID:hug.types.text, username:hug.types.text):
 
-    timelines = db["posts"]
     listOfPosts = likes.lrange(username, 0, -1)
 
     if not postID.encode("utf-8") in listOfPosts:
         likes.rpush(username, postID)
+        if not postID.encode("utf-8") in likes.lrange("postsWithLikes", 0, -1):
+            likes.rpush("postsWithLikes", postID)
         likes.incr("postID:"+postID)
+        
         return (username + " has successfully liked the post " + postID)
     else:
         likes.delete(username, postID)
@@ -38,35 +43,35 @@ def likePosts(db:timelinesdb, postID:hug.types.text, username:hug.types.text):
         return (username + " has successfully unliked the post " + postID)
 
 @hug.get("/likesCount/")
-def likeCount(db:timelinesdb, postID:hug.types.text):
+def likeCount(postID:hug.types.text):
     return likes.get("postID:"+postID)
 
 @hug.get("/likedPosts/")
-def likedPosts(db:timelinesdb, username:hug.types.text):
-    timelines = db["posts"]
+def likedPosts(username:hug.types.text):
+
     postIDs = likes.lrange(username, 0, -1)
-    values = str
+    result = {}
     
-    for i in range(len(values)):
-        if i==0:
-            values = "id = ?"
-        else:
-            values += " OR id = ?"
-        
-    return {"posts" : timelines.rows_where(values, postIDs)}
 
-#     @hug.get("/posts/mypost/")
-# def getUserTimeline(db:timelinesdb, username):
-    
-#     timelines = db["posts"]
+    for i in postIDs:
+        response = requests.get('http://localhost/posts/' + i.decode("utf-8") )
+        result[i.decode("utf-8")]=response.json()["post"]
+    return result
 
-#     return {"posts" : timelines.rows_where("username = ?", [username])}
-
+@hug.get("/topPosts/")
+def topPosts( number:hug.types.number):
+    L = []
+    range = likes.lrange("postsWithLikes", 0, -1)
+    for i in range:
+        response = requests.get('http://localhost:8000/likesCount/?postID=' + i.decode("utf-8") )
+        L.append({i.decode("utf-8"), response})
+    return L
 
 # API call to flush the database
 @hug.get("/flush/")
 def flush():
-        return ("This post has " + likes.flushdb() + " likes")
+        likes.flushdb()
+        return "The database has been flushed"
 
 
 

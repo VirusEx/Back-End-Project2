@@ -87,6 +87,19 @@ def postTweet(
     except Exception as e:
         response.status = hug.falcon.HTTP_409
         return {"error": str(e)}
-
+        
     #response.set_header("Location", f"/followers/{follower['id']}")
     return post
+
+
+@hug.get("/posts/{id}")
+def getPost(response, db:timelinesdb, id:hug.types.number):
+    timelines = db["posts"]
+    
+    posts = []
+    try:
+        post = db["posts"].get(id)
+        posts.append(post)
+    except sqlite_utils.db.NotFoundError:
+        response.status = hug.falcon.HTTP_404
+    return {"post": posts}
