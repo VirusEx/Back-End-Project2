@@ -121,3 +121,6 @@ def getFollowings (db:sqlite,  response, user_id:hug.types.number):
     
     return followers.rows_where("follower_id = ?", [user_id], select='following_id')
 
+@hug.get("/health_check/")
+def health_check ():
+    return hug.falcon.HTTP_200
