@@ -54,7 +54,7 @@ def likedPosts(username:hug.types.text):
     
 
     for i in postIDs:
-        response = requests.get('http://localhost/posts/' + i.decode("utf-8") )
+        response = requests.get('http://localhost:5100/posts/' + i.decode("utf-8") )
         result[i.decode("utf-8")]=response.json()["post"]
     return result
 
@@ -63,7 +63,7 @@ def topPosts( number:hug.types.number):
     L = []
     range = likes.lrange("postsWithLikes", 0, -1)
     for i in range:
-        response = requests.get('http://localhost:8000/likesCount/?postID=' + i.decode("utf-8") )
+        response = requests.get('http://localhost:5200/likesCount/?postID=' + i.decode("utf-8") )
         L.append({i.decode("utf-8"), response})
     return L
 

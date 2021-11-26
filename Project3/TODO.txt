@@ -1,2 +1,0 @@
-on USERS: liked posts table
-on POSTS: like counter
